@@ -2196,7 +2196,7 @@ KeyPathExpr::Component::Component(ASTContext *ctxForCopyingLabels,
   SubscriptLabelsData = subscriptLabels.data();
   SubscriptHashableConformancesData = indexHashables.empty()
     ? nullptr : indexHashables.data();
-  SubscriptSizeOrTupleIndex = subscriptLabels.size();
+  SubscriptSize = subscriptLabels.size();
 }
 
 KeyPathExpr::Component
@@ -2213,7 +2213,7 @@ void KeyPathExpr::Component::setSubscriptIndexHashableConformances(
     ArrayRef<ProtocolConformanceRef> hashables) {
   switch (getKind()) {
   case Kind::Subscript:
-    assert(hashables.size() == SubscriptSizeOrTupleIndex);
+    assert(hashables.size() == SubscriptSize);
     SubscriptHashableConformancesData = getComponentType()->getASTContext()
       .AllocateCopy(hashables)
       .data();
@@ -2226,7 +2226,6 @@ void KeyPathExpr::Component::setSubscriptIndexHashableConformances(
   case Kind::OptionalForce:
   case Kind::UnresolvedProperty:
   case Kind::Property:
-  case Kind::TupleIndex:
   case Kind::Identity:
     llvm_unreachable("no hashable conformances for this kind");
   }

@@ -217,7 +217,6 @@ Optional<Type> TypeChecker::checkObjCKeyPathExpr(DeclContext *dc,
       continue;
     case KeyPathExpr::Component::Kind::OptionalWrap:
     case KeyPathExpr::Component::Kind::Property:
-    case KeyPathExpr::Component::Kind::TupleIndex:
     case KeyPathExpr::Component::Kind::Subscript:
       llvm_unreachable("already resolved!");
     }

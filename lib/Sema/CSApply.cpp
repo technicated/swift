@@ -277,10 +277,6 @@ static bool buildObjCKeyPathString(KeyPathExpr *E,
       buf.append(objcName.begin(), objcName.end());
       continue;
     }
-    case KeyPathExpr::Component::Kind::TupleIndex: {
-      // Tuples do not exist in ObjC
-      return false;
-    }
     case KeyPathExpr::Component::Kind::Subscript: {
       // Subscripts aren't generally represented in KVC.
       // TODO: There are some subscript forms we could map to KVC, such as
@@ -4316,10 +4312,7 @@ namespace {
             break;
           }
 
-llvm::outs() << "*** foundDecl: (" << foundDecl.getPointer() << ")\n";
-if (foundDecl->choice.isDecl()) {
           auto property = foundDecl->choice.getDecl();
-llvm::outs() << "*** property: (" << property << ")\n";
           
           // Key paths can only refer to properties currently.
           if (!isa<VarDecl>(property)) {
@@ -4361,14 +4354,7 @@ llvm::outs() << "*** property: (" << property << ")\n";
           component = KeyPathExpr::Component::forProperty(ref,
                                                        resolvedTy,
                                                        origComponent.getLoc());
-} else {
-  auto resolvedTy = foundDecl->openedType;
-  resolvedTy = simplifyType(resolvedTy);
 
-  component = KeyPathExpr::Component::forTupleIndex(0,
-                                                 resolvedTy,
-                                                 origComponent.getLoc());
-}
           baseTy = component.getComponentType();
           resolvedComponents.push_back(component);
 
@@ -4506,7 +4492,6 @@ llvm::outs() << "*** property: (" << property << ")\n";
           resolvedComponents.push_back(component);
           break;
         case KeyPathExpr::Component::Kind::Property:
-        case KeyPathExpr::Component::Kind::TupleIndex:
         case KeyPathExpr::Component::Kind::Subscript:
         case KeyPathExpr::Component::Kind::OptionalWrap:
           llvm_unreachable("already resolved");

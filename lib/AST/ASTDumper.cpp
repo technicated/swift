@@ -2593,12 +2593,6 @@ public:
         printDeclRef(component.getDeclRef());
         OS << " ";
         break;
-    
-      case KeyPathExpr::Component::Kind::TupleIndex:
-        OS << "tuple_index ";
-        OS << component.getTupleIndex();
-        OS << " ";
-        break;
       
       case KeyPathExpr::Component::Kind::Subscript:
         OS << "subscript ";
