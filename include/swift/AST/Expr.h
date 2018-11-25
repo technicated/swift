@@ -4823,6 +4823,7 @@ public:
       UnresolvedProperty,
       UnresolvedSubscript,
       Property,
+      TupleIndex,
       Subscript,
       OptionalForce,
       OptionalChain,
@@ -4844,7 +4845,7 @@ public:
     Expr *SubscriptIndexExpr;
     const Identifier *SubscriptLabelsData;
     const ProtocolConformanceRef *SubscriptHashableConformancesData;
-    unsigned SubscriptSize;
+    unsigned SubscriptSizeOrTupleIndex;
     Kind KindValue;
     Type ComponentType;
     SourceLoc Loc;
@@ -4924,6 +4925,16 @@ public:
                        propertyType,
                        loc);
     }
+
+    /// Create a component for a tuple index.
+    static Component forTupleIndex(unsigned tupleIndex,
+                                 Type tupleElemType,
+                                 SourceLoc loc) {
+      return Component(nullptr, {}, nullptr, {}, {},
+                       Kind::TupleIndex,
+                       tupleElemType,
+                       loc);
+    }
     
     /// Create a component for a subscript.
     static Component forSubscript(ASTContext &ctx,
@@ -4999,12 +5010,32 @@ public:
       case Kind::OptionalForce:
       case Kind::Property:
       case Kind::Identity:
+      case Kind::TupleIndex:
         return true;
 
       case Kind::UnresolvedSubscript:
       case Kind::UnresolvedProperty:
       case Kind::Invalid:
         return false;
+      }
+      llvm_unreachable("unhandled kind");
+    }
+
+    unsigned getTupleIndex() const {
+     switch (getKind()) {
+      case Kind::TupleIndex:
+        return SubscriptSizeOrTupleIndex;
+
+      case Kind::Invalid:
+      case Kind::OptionalChain:
+      case Kind::OptionalWrap:
+      case Kind::OptionalForce:
+      case Kind::UnresolvedProperty:
+      case Kind::Property:
+      case Kind::Identity:
+      case Kind::Subscript:
+      case Kind::UnresolvedSubscript:
+        llvm_unreachable("no tuple index for this kind");
       }
       llvm_unreachable("unhandled kind");
     }
@@ -5021,6 +5052,7 @@ public:
       case Kind::OptionalForce:
       case Kind::UnresolvedProperty:
       case Kind::Property:
+      case Kind::TupleIndex:
       case Kind::Identity:
         return nullptr;
       }
@@ -5031,7 +5063,7 @@ public:
       switch (getKind()) {
       case Kind::Subscript:
       case Kind::UnresolvedSubscript:
-        return {SubscriptLabelsData, (size_t)SubscriptSize};
+        return {SubscriptLabelsData, (size_t)SubscriptSizeOrTupleIndex};
 
       case Kind::Invalid:
       case Kind::OptionalChain:
@@ -5039,6 +5071,7 @@ public:
       case Kind::OptionalForce:
       case Kind::UnresolvedProperty:
       case Kind::Property:
+      case Kind::TupleIndex:
       case Kind::Identity:
         llvm_unreachable("no subscript labels for this kind");
       }
@@ -5051,7 +5084,7 @@ public:
       case Kind::Subscript:
         if (!SubscriptHashableConformancesData)
           return {};
-        return {SubscriptHashableConformancesData, (size_t)SubscriptSize};
+        return {SubscriptHashableConformancesData, (size_t)SubscriptSizeOrTupleIndex};
 
       case Kind::UnresolvedSubscript:
       case Kind::Invalid:
@@ -5060,6 +5093,7 @@ public:
       case Kind::OptionalForce:
       case Kind::UnresolvedProperty:
       case Kind::Property:
+      case Kind::TupleIndex:
       case Kind::Identity:
         return {};
       }
@@ -5081,6 +5115,7 @@ public:
       case Kind::OptionalWrap:
       case Kind::OptionalForce:
       case Kind::Property:
+      case Kind::TupleIndex:
       case Kind::Identity:
         llvm_unreachable("no unresolved name for this kind");
       }
@@ -5100,6 +5135,7 @@ public:
       case Kind::OptionalWrap:
       case Kind::OptionalForce:
       case Kind::Identity:
+      case Kind::TupleIndex:
         llvm_unreachable("no decl ref for this kind");
       }
       llvm_unreachable("unhandled kind");

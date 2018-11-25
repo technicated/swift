@@ -639,6 +639,7 @@ getCalleeDeclAndArgs(ConstraintSystem &cs,
     case KeyPathExpr::Component::Kind::Invalid:
     case KeyPathExpr::Component::Kind::UnresolvedProperty:
     case KeyPathExpr::Component::Kind::Property:
+    case KeyPathExpr::Component::Kind::TupleIndex:
     case KeyPathExpr::Component::Kind::OptionalForce:
     case KeyPathExpr::Component::Kind::OptionalChain:
     case KeyPathExpr::Component::Kind::OptionalWrap:
@@ -4254,6 +4255,7 @@ ConstraintSystem::simplifyKeyPathConstraint(Type keyPathTy,
       break;
       
     case KeyPathExpr::Component::Kind::Property:
+    case KeyPathExpr::Component::Kind::TupleIndex:
     case KeyPathExpr::Component::Kind::Subscript:
     case KeyPathExpr::Component::Kind::UnresolvedProperty:
     case KeyPathExpr::Component::Kind::UnresolvedSubscript: {
@@ -4271,6 +4273,11 @@ ConstraintSystem::simplifyKeyPathConstraint(Type keyPathTy,
       
       // Discarded unsupported non-decl member lookups.
       if (!choices[i].isDecl()) {
+if (choices[i].getKind() == OverloadChoiceKind::TupleIndex) {
+  llvm::outs() << "**** tuple index detected! (" << choices[i].getTupleIndex() << ")\n";
+  capability = ReadOnly;
+  continue;
+}
         return SolutionKind::Error;
       }
       auto storage = dyn_cast<AbstractStorageDecl>(choices[i].getDecl());

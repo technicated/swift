@@ -3074,6 +3074,7 @@ namespace {
           break;
         }
         case KeyPathExpr::Component::Kind::Identity:
+        case KeyPathExpr::Component::Kind::TupleIndex:
           continue;
         }
       }
