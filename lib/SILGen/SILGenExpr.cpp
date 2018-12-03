@@ -3603,14 +3603,6 @@ RValue RValueEmitter::visitKeyPathExpr(KeyPathExpr *E, SGFContext C) {
       break;
     }
         
-    case KeyPathExpr::Component::Kind::TupleElement: {
-      auto comp = KeyPathPatternComponent::forTupleElement(
-                                      component.getTupleElementIdx());
-      loweredComponents.push_back(comp);
-        
-      break;
-    }
-
     case KeyPathExpr::Component::Kind::OptionalChain:
     case KeyPathExpr::Component::Kind::OptionalForce:
     case KeyPathExpr::Component::Kind::OptionalWrap: {

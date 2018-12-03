@@ -277,9 +277,8 @@ static bool buildObjCKeyPathString(KeyPathExpr *E,
       buf.append(objcName.begin(), objcName.end());
       continue;
     }
-    case KeyPathExpr::Component::Kind::Subscript:
-    case KeyPathExpr::Component::Kind::TupleElement:
-      // Subscripts and Tuples aren't generally represented in KVC.
+    case KeyPathExpr::Component::Kind::Subscript: {
+      // Subscripts aren't generally represented in KVC.
       // TODO: There are some subscript forms we could map to KVC, such as
       // when indexing a Dictionary or NSDictionary by string, or when applying
       // a mapping subscript operation to Array/Set or NSArray/NSSet.
@@ -290,6 +289,7 @@ static bool buildObjCKeyPathString(KeyPathExpr *E,
       // Don't bother building the key path string if the key path didn't even
       // resolve.
       return false;
+    }
     }
   }
   
@@ -4305,9 +4305,6 @@ namespace {
 
         KeyPathExpr::Component component;
         switch (kind) {
-        case KeyPathExpr::Component::Kind::TupleElement:
-          llvm_unreachable("unhandled KeyPathExpr::Component::Kind::TupleElement");
-                
         case KeyPathExpr::Component::Kind::UnresolvedProperty: {
           // If we couldn't resolve the component, leave it alone.
           if (!foundDecl) {
@@ -4315,57 +4312,48 @@ namespace {
             break;
           }
 
-          if (foundDecl->choice.isDecl()) {
-            auto property = foundDecl->choice.getDecl();
-              
-            // Key paths can only refer to properties currently.
-            if (!isa<VarDecl>(property)) {
+          auto property = foundDecl->choice.getDecl();
+          
+          // Key paths can only refer to properties currently.
+          if (!isa<VarDecl>(property)) {
+            cs.TC.diagnose(origComponent.getLoc(),
+                           diag::expr_keypath_not_property,
+                           property->getDescriptiveKind(),
+                           property->getFullName());
+          } else {
+            // Key paths don't work with mutating-get properties.
+            auto varDecl = cast<VarDecl>(property);
+            if (varDecl->isGetterMutating()) {
               cs.TC.diagnose(origComponent.getLoc(),
-                             diag::expr_keypath_not_property,
-                             property->getDescriptiveKind(),
+                             diag::expr_keypath_mutating_getter,
                              property->getFullName());
-            } else {
-              // Key paths don't work with mutating-get properties.
-              auto varDecl = cast<VarDecl>(property);
-              if (varDecl->isGetterMutating()) {
-                cs.TC.diagnose(origComponent.getLoc(),
-                               diag::expr_keypath_mutating_getter,
-                               property->getFullName());
-              }
-                  
-              // Key paths don't currently support static members.
-              if (varDecl->isStatic()) {
-                cs.TC.diagnose(origComponent.getLoc(),
-                               diag::expr_keypath_static_member,
-                               property->getFullName());
-              }
             }
-              
-            cs.TC.requestMemberLayout(property);
-              
-            auto dc = property->getInnermostDeclContext();
-              
-            // Compute substitutions to refer to the member.
-            SubstitutionMap subs =
+            
+            // Key paths don't currently support static members.
+            if (varDecl->isStatic()) {
+              cs.TC.diagnose(origComponent.getLoc(),
+                             diag::expr_keypath_static_member,
+                             property->getFullName());
+            }
+          }
+          
+          cs.TC.requestMemberLayout(property);
+
+          auto dc = property->getInnermostDeclContext();
+
+          // Compute substitutions to refer to the member.
+          SubstitutionMap subs =
             solution.computeSubstitutions(dc->getGenericSignatureOfContext(),
                                           locator);
-              
-            auto resolvedTy = foundDecl->openedType;
-            resolvedTy = simplifyType(resolvedTy);
-              
-            auto ref = ConcreteDeclRef(property, subs);
-              
-            component = KeyPathExpr::Component::forProperty(ref,
-                                                            resolvedTy,
-                                                            origComponent.getLoc());
-          } else {
-              auto resolvedTy = foundDecl->openedType;
-              resolvedTy = simplifyType(resolvedTy);
 
-              component = KeyPathExpr::Component::forTupleElement(foundDecl->choice.getTupleIndex(),
-                                                                  resolvedTy,
-                                                                  origComponent.getLoc());
-          }
+          auto resolvedTy = foundDecl->openedType;
+          resolvedTy = simplifyType(resolvedTy);
+          
+          auto ref = ConcreteDeclRef(property, subs);
+
+          component = KeyPathExpr::Component::forProperty(ref,
+                                                       resolvedTy,
+                                                       origComponent.getLoc());
 
           baseTy = component.getComponentType();
           resolvedComponents.push_back(component);

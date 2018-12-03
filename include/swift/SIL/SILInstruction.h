@@ -2455,9 +2455,6 @@ private:
     : ValueAndKind(storedProp, PackedStored),
       ComponentType(ComponentType) {}
 
-  KeyPathPatternComponent(unsigned tupleIndex)
-    : ValueAndKind((void *) tupleIndex, PackedStored) {}
-    
   /// Constructor for computed components
   KeyPathPatternComponent(ComputedPropertyId id,
                           SILFunction *getter,
@@ -2695,12 +2692,7 @@ public:
     }
     return KeyPathPatternComponent(kind, ty);
   }
- 
-  static KeyPathPatternComponent
-  forTupleElement(unsigned elementIdx) {
-      return KeyPathPatternComponent(elementIdx);
-  }
-    
+  
   void incrementRefCounts() const;
   void decrementRefCounts() const;
   

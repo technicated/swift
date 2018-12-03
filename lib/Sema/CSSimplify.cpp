@@ -643,7 +643,6 @@ getCalleeDeclAndArgs(ConstraintSystem &cs,
     case KeyPathExpr::Component::Kind::OptionalChain:
     case KeyPathExpr::Component::Kind::OptionalWrap:
     case KeyPathExpr::Component::Kind::Identity:
-    case KeyPathExpr::Component::Kind::TupleElement:
       return std::make_tuple(nullptr, /*hasCurriedSelf=*/false, argLabels,
                              hasTrailingClosure);
     }
@@ -4254,9 +4253,6 @@ ConstraintSystem::simplifyKeyPathConstraint(Type keyPathTy,
     case KeyPathExpr::Component::Kind::Identity:
       break;
       
-    case KeyPathExpr::Component::Kind::TupleElement:
-      llvm_unreachable("unhandled KeyPathExpr::Component::Kind::TupleElement");
-            
     case KeyPathExpr::Component::Kind::Property:
     case KeyPathExpr::Component::Kind::Subscript:
     case KeyPathExpr::Component::Kind::UnresolvedProperty:
@@ -4275,10 +4271,6 @@ ConstraintSystem::simplifyKeyPathConstraint(Type keyPathTy,
       
       // Discarded unsupported non-decl member lookups.
       if (!choices[i].isDecl()) {
-        if (choices[i].getKind() == OverloadChoiceKind::TupleIndex) {
-          capability = ReadOnly;
-          break;
-        }
         return SolutionKind::Error;
       }
       auto storage = dyn_cast<AbstractStorageDecl>(choices[i].getDecl());

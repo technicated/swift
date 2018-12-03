@@ -4828,7 +4828,6 @@ public:
       OptionalChain,
       OptionalWrap,
       Identity,
-      TupleElement,
     };
   
   private:
@@ -4977,14 +4976,6 @@ public:
                        selfLoc);
     }
     
-    static Component forTupleElement(unsigned tupleIndex,
-                                     Type elemTy,
-                                     SourceLoc loc) {
-      return Component(nullptr, {}, nullptr, {}, {},
-                       Kind::TupleElement, elemTy,
-                       loc);
-    }
-      
     SourceLoc getLoc() const {
       return Loc;
     }
@@ -5008,7 +4999,6 @@ public:
       case Kind::OptionalForce:
       case Kind::Property:
       case Kind::Identity:
-      case Kind::TupleElement:
         return true;
 
       case Kind::UnresolvedSubscript:
@@ -5032,7 +5022,6 @@ public:
       case Kind::UnresolvedProperty:
       case Kind::Property:
       case Kind::Identity:
-      case Kind::TupleElement:
         return nullptr;
       }
       llvm_unreachable("unhandled kind");
@@ -5051,7 +5040,6 @@ public:
       case Kind::UnresolvedProperty:
       case Kind::Property:
       case Kind::Identity:
-      case Kind::TupleElement:
         llvm_unreachable("no subscript labels for this kind");
       }
       llvm_unreachable("unhandled kind");
@@ -5073,7 +5061,6 @@ public:
       case Kind::UnresolvedProperty:
       case Kind::Property:
       case Kind::Identity:
-      case Kind::TupleElement:
         return {};
       }
       llvm_unreachable("unhandled kind");
@@ -5087,9 +5074,6 @@ public:
       case Kind::UnresolvedProperty:
         return Decl.UnresolvedName;
 
-      case KeyPathExpr::Component::Kind::TupleElement:
-        llvm_unreachable("unhandled KeyPathExpr::Component::Kind::TupleElement");
-              
       case Kind::Invalid:
       case Kind::Subscript:
       case Kind::UnresolvedSubscript:
@@ -5107,7 +5091,6 @@ public:
       switch (getKind()) {
       case Kind::Property:
       case Kind::Subscript:
-      case Kind::TupleElement:
         return Decl.ResolvedDecl;
 
       case Kind::Invalid:
@@ -5122,25 +5105,6 @@ public:
       llvm_unreachable("unhandled kind");
     }
 
-    unsigned getTupleElementIdx() const {
-        switch (getKind()) {
-        case Kind::TupleElement:
-          return 0;
-                
-        case Kind::Invalid:
-        case Kind::UnresolvedProperty:
-        case Kind::Property:
-        case Kind::UnresolvedSubscript:
-        case Kind::Subscript:
-        case Kind::OptionalChain:
-        case Kind::OptionalWrap:
-        case Kind::OptionalForce:
-        case Kind::Identity:
-          llvm_unreachable("no tuple element for this kind");
-        }
-        llvm_unreachable("unhandled kind");
-    }
-      
     Type getComponentType() const {
       return ComponentType;
     }

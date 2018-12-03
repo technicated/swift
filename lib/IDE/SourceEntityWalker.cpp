@@ -361,9 +361,6 @@ std::pair<bool, Expr *> SemaAnnotator::walkToExprPre(Expr *E) {
         break;
       }
 
-      case KeyPathExpr::Component::Kind::TupleElement:
-        llvm_unreachable("unhandled KeyPathExpr::Component::Kind::TupleElement");
-              
       case KeyPathExpr::Component::Kind::Invalid:
       case KeyPathExpr::Component::Kind::UnresolvedProperty:
       case KeyPathExpr::Component::Kind::UnresolvedSubscript:

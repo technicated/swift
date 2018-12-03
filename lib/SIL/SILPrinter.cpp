@@ -2047,7 +2047,6 @@ public:
 
     switch (auto kind = component.getKind()) {
     case KeyPathPatternComponent::Kind::StoredProperty: {
-      break;
       auto prop = component.getStoredPropertyDecl();
       *this << "stored_property #";
       printValueDecl(prop, PrintState.OS);

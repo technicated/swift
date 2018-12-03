@@ -3046,9 +3046,6 @@ namespace {
           break;
         }
         
-        case KeyPathExpr::Component::Kind::TupleElement:
-          llvm_unreachable("unhandled KeyPathExpr::Component::Kind::TupleElement");                
-                
         case KeyPathExpr::Component::Kind::OptionalChain: {
           didOptionalChain = true;
           
