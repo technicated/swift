@@ -4221,7 +4221,8 @@ public:
             "keypath root type should match root type of keypath pattern");
 
     auto leafTy = CanType(kpBGT->getGenericArgs()[1]);
-    require(leafTy == pattern->getValueType().subst(patternSubs)->getCanonicalType(),
+    auto oth = pattern->getValueType().subst(patternSubs)->getCanonicalType();
+    require(leafTy == oth,
             "keypath value type should match value type of keypath pattern");
     
     {

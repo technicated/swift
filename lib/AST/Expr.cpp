@@ -2227,6 +2227,7 @@ void KeyPathExpr::Component::setSubscriptIndexHashableConformances(
   case Kind::UnresolvedProperty:
   case Kind::Property:
   case Kind::Identity:
+  case Kind::TupleElement:
     llvm_unreachable("no hashable conformances for this kind");
   }
 }
