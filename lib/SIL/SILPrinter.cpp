@@ -2053,6 +2053,11 @@ public:
       *this << " : $" << component.getComponentType();
       break;
     }
+    case KeyPathPatternComponent::Kind::TupleElement: {
+      llvm_unreachable("[TOMA91] What to do here?");
+      // [TOMA91 - IDEA] *this << "tuple_field #" << component.getFieldNo() << " : $";
+      break;
+    }
     case KeyPathPatternComponent::Kind::GettableProperty:
     case KeyPathPatternComponent::Kind::SettableProperty: {
       *this << (kind == KeyPathPatternComponent::Kind::GettableProperty

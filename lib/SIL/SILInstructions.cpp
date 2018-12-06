@@ -2051,6 +2051,7 @@ ConvertEscapeToNoEscapeInst *ConvertEscapeToNoEscapeInst::create(
 bool KeyPathPatternComponent::isComputedSettablePropertyMutating() const {
   switch (getKind()) {
   case Kind::StoredProperty:
+  case Kind::TupleElement:
   case Kind::GettableProperty:
   case Kind::OptionalChain:
   case Kind::OptionalWrap:
@@ -2070,6 +2071,7 @@ forEachRefcountableReference(const KeyPathPatternComponent &component,
                          llvm::function_ref<void (SILFunction*)> forFunction) {
   switch (component.getKind()) {
   case KeyPathPatternComponent::Kind::StoredProperty:
+  case KeyPathPatternComponent::Kind::TupleElement:
   case KeyPathPatternComponent::Kind::OptionalChain:
   case KeyPathPatternComponent::Kind::OptionalWrap:
   case KeyPathPatternComponent::Kind::OptionalForce:
@@ -2126,6 +2128,7 @@ KeyPathPattern::get(SILModule &M, CanGenericSignature signature,
   for (auto component : components) {
     switch (component.getKind()) {
     case KeyPathPatternComponent::Kind::StoredProperty:
+    case KeyPathPatternComponent::Kind::TupleElement:
     case KeyPathPatternComponent::Kind::OptionalChain:
     case KeyPathPatternComponent::Kind::OptionalWrap:
     case KeyPathPatternComponent::Kind::OptionalForce:
@@ -2207,6 +2210,11 @@ void KeyPathPattern::Profile(llvm::FoldingSetNodeID &ID,
       
     case KeyPathPatternComponent::Kind::StoredProperty:
       ID.AddPointer(component.getStoredPropertyDecl());
+      break;
+
+    case KeyPathPatternComponent::Kind::TupleElement:
+      llvm_unreachable("[TOMA91] What to do here?");
+      // [TOMA91 - IDEA] ID.AddInteger(component.getFieldNo())
       break;
             
     case KeyPathPatternComponent::Kind::SettableProperty:

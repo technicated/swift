@@ -184,6 +184,9 @@ void GlobalAccessRemoval::visitInstruction(SILInstruction *I) {
         recordAccess(KPI, component.getStoredPropertyDecl(),
                      AccessedStorage::Class, /*hasNoNestedConflict=*/false);
         break;
+      case KeyPathPatternComponent::Kind::TupleElement:
+        llvm_unreachable("[TOMA91] What to do here?");
+        break;
       case KeyPathPatternComponent::Kind::GettableProperty:
       case KeyPathPatternComponent::Kind::SettableProperty:
       case KeyPathPatternComponent::Kind::OptionalChain:

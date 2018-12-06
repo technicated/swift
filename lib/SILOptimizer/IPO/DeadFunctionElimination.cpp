@@ -232,6 +232,7 @@ protected:
       break;
     }
     case KeyPathPatternComponent::Kind::StoredProperty:
+    case KeyPathPatternComponent::Kind::TupleElement:
     case KeyPathPatternComponent::Kind::OptionalChain:
     case KeyPathPatternComponent::Kind::OptionalForce:
     case KeyPathPatternComponent::Kind::OptionalWrap:

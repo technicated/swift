@@ -659,6 +659,11 @@ SILSerializer::writeKeyPathPatternComponent(
     handleComponentCommon(KeyPathComponentKindEncoding::StoredProperty);
     ListOfValues.push_back(S.addDeclRef(component.getStoredPropertyDecl()));
     break;
+  case KeyPathPatternComponent::Kind::TupleElement:
+    llvm_unreachable("[TOMA91] What to do here?");
+    // [TOMA91 - IDEA] handleComponentCommon(KeyPathComponentKindEncoding::TupleElement);
+    // [TOMA91 - IDEA] ListOfValues.push_back(component.getFieldNo());
+    break;
   case KeyPathPatternComponent::Kind::GettableProperty:
     handleComponentCommon(KeyPathComponentKindEncoding::GettableProperty);
     handleComputedId(component.getComputedPropertyId());

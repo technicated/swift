@@ -225,7 +225,11 @@ void verifyKeyPathComponent(SILModule &M,
             "formal type");
     break;
   }
-    
+
+  case KeyPathPatternComponent::Kind::TupleElement:
+    llvm_unreachable("[TOMA91] What to do here?");
+    break;
+          
   case KeyPathPatternComponent::Kind::GettableProperty:
   case KeyPathPatternComponent::Kind::SettableProperty: {
     if (forPropertyDescriptor) {
@@ -4237,6 +4241,7 @@ public:
           break;
         
         case KeyPathPatternComponent::Kind::StoredProperty:
+        case KeyPathPatternComponent::Kind::TupleElement:
         case KeyPathPatternComponent::Kind::OptionalChain:
         case KeyPathPatternComponent::Kind::OptionalWrap:
         case KeyPathPatternComponent::Kind::OptionalForce:

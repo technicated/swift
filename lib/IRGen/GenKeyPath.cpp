@@ -24,6 +24,7 @@
 #include "GenMeta.h"
 #include "GenProto.h"
 #include "GenStruct.h"
+#include "GenTuple.h"
 #include "GenType.h"
 #include "GenericRequirement.h"
 #include "IRGenDebugInfo.h"
@@ -876,6 +877,20 @@ emitKeyPathComponent(IRGenModule &IGM,
     }
     llvm_unreachable("not struct or class");
   }
+  case KeyPathPatternComponent::Kind::TupleElement: {
+    auto header = KeyPathComponentHeader
+      ::forStructComponentWithInlineOffset(false, 0);
+    fields.addInt32(header.getData());
+      
+    auto something1 = getFixedTupleElementOffset(IGM, loweredBaseTy, 0);
+    auto something2 = getPhysicalTupleElementStructIndex(IGM, loweredBaseTy, 0);
+      
+//      loweredBaseTy.getASTType().getPointer()->
+      
+      
+    llvm_unreachable("[TOMA91] What to do here!");
+    break;
+  }
   case KeyPathPatternComponent::Kind::GettableProperty:
   case KeyPathPatternComponent::Kind::SettableProperty: {
     // If the component references an external property, encode that in a
@@ -1195,6 +1210,7 @@ IRGenModule::getAddrOfKeyPathPattern(KeyPathPattern *pattern,
       }
       break;
     case KeyPathPatternComponent::Kind::StoredProperty:
+    case KeyPathPatternComponent::Kind::TupleElement:
     case KeyPathPatternComponent::Kind::OptionalChain:
     case KeyPathPatternComponent::Kind::OptionalForce:
     case KeyPathPatternComponent::Kind::OptionalWrap:

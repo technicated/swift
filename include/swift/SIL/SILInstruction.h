@@ -2395,6 +2395,7 @@ public:
   
   enum class Kind: unsigned {
     StoredProperty,
+    TupleElement,
     GettableProperty,
     SettableProperty,
     OptionalChain,
@@ -2423,6 +2424,7 @@ private:
   static unsigned getPackedKind(Kind k) {
     switch (k) {
     case Kind::StoredProperty:
+    case Kind::TupleElement:
       return PackedStored;
     case Kind::GettableProperty:
     case Kind::SettableProperty:
@@ -2513,6 +2515,7 @@ public:
     switch (getKind()) {
     case Kind::StoredProperty:
       return static_cast<VarDecl*>(ValueAndKind.getPointer());
+    case Kind::TupleElement:
     case Kind::GettableProperty:
     case Kind::SettableProperty:
     case Kind::OptionalChain:
@@ -2526,6 +2529,7 @@ public:
   ComputedPropertyId getComputedPropertyId() const {
     switch (getKind()) {
     case Kind::StoredProperty:
+    case Kind::TupleElement:
     case Kind::OptionalChain:
     case Kind::OptionalForce:
     case Kind::OptionalWrap:
@@ -2541,6 +2545,7 @@ public:
   SILFunction *getComputedPropertyGetter() const {
     switch (getKind()) {
     case Kind::StoredProperty:
+    case Kind::TupleElement:
     case Kind::OptionalChain:
     case Kind::OptionalForce:
     case Kind::OptionalWrap:
@@ -2555,6 +2560,7 @@ public:
   SILFunction *getComputedPropertySetter() const {
     switch (getKind()) {
     case Kind::StoredProperty:
+    case Kind::TupleElement:
     case Kind::GettableProperty:
     case Kind::OptionalChain:
     case Kind::OptionalForce:
@@ -2569,6 +2575,7 @@ public:
   ArrayRef<Index> getSubscriptIndices() const {
     switch (getKind()) {
     case Kind::StoredProperty:
+    case Kind::TupleElement:
     case Kind::OptionalChain:
     case Kind::OptionalForce:
     case Kind::OptionalWrap:
@@ -2583,6 +2590,7 @@ public:
   SILFunction *getSubscriptIndexEquals() const {
     switch (getKind()) {
     case Kind::StoredProperty:
+    case Kind::TupleElement:
     case Kind::OptionalChain:
     case Kind::OptionalForce:
     case Kind::OptionalWrap:
@@ -2596,6 +2604,7 @@ public:
   SILFunction *getSubscriptIndexHash() const {
     switch (getKind()) {
     case Kind::StoredProperty:
+    case Kind::TupleElement:
     case Kind::OptionalChain:
     case Kind::OptionalForce:
     case Kind::OptionalWrap:
@@ -2617,6 +2626,7 @@ public:
   AbstractStorageDecl *getExternalDecl() const {
     switch (getKind()) {
     case Kind::StoredProperty:
+    case Kind::TupleElement:
     case Kind::OptionalChain:
     case Kind::OptionalForce:
     case Kind::OptionalWrap:
@@ -2631,6 +2641,7 @@ public:
   SubstitutionMap getExternalSubstitutions() const {
     switch (getKind()) {
     case Kind::StoredProperty:
+    case Kind::TupleElement:
     case Kind::OptionalChain:
     case Kind::OptionalForce:
     case Kind::OptionalWrap:
@@ -2686,6 +2697,7 @@ public:
              "optional wrap didn't form optional?!");
       break;
     case Kind::StoredProperty:
+    case Kind::TupleElement:
     case Kind::GettableProperty:
     case Kind::SettableProperty:
       llvm_unreachable("not an optional kind");
