@@ -4823,6 +4823,7 @@ public:
       UnresolvedProperty,
       UnresolvedSubscript,
       Property,
+      TupleElement,
       Subscript,
       OptionalForce,
       OptionalChain,
@@ -4925,6 +4926,13 @@ public:
                        loc);
     }
     
+    static Component forTupleElement(unsigned fieldNo, SourceLoc loc) {
+      return Component(nullptr, {}, nullptr, {}, {},
+                       Kind::TupleElement,
+                       Type(),
+                       loc);
+    }
+      
     /// Create a component for a subscript.
     static Component forSubscript(ASTContext &ctx,
                               ConcreteDeclRef subscript,
@@ -4998,6 +5006,7 @@ public:
       case Kind::OptionalWrap:
       case Kind::OptionalForce:
       case Kind::Property:
+      case Kind::TupleElement:
       case Kind::Identity:
         return true;
 
@@ -5021,6 +5030,7 @@ public:
       case Kind::OptionalForce:
       case Kind::UnresolvedProperty:
       case Kind::Property:
+      case Kind::TupleElement:
       case Kind::Identity:
         return nullptr;
       }
@@ -5039,6 +5049,7 @@ public:
       case Kind::OptionalForce:
       case Kind::UnresolvedProperty:
       case Kind::Property:
+      case Kind::TupleElement:
       case Kind::Identity:
         llvm_unreachable("no subscript labels for this kind");
       }
@@ -5060,6 +5071,7 @@ public:
       case Kind::OptionalForce:
       case Kind::UnresolvedProperty:
       case Kind::Property:
+      case Kind::TupleElement:
       case Kind::Identity:
         return {};
       }
@@ -5081,6 +5093,7 @@ public:
       case Kind::OptionalWrap:
       case Kind::OptionalForce:
       case Kind::Property:
+      case Kind::TupleElement:
       case Kind::Identity:
         llvm_unreachable("no unresolved name for this kind");
       }
@@ -5094,6 +5107,7 @@ public:
         return Decl.ResolvedDecl;
 
       case Kind::Invalid:
+      case Kind::TupleElement:
       case Kind::UnresolvedProperty:
       case Kind::UnresolvedSubscript:
       case Kind::OptionalChain:
@@ -5103,6 +5117,25 @@ public:
         llvm_unreachable("no decl ref for this kind");
       }
       llvm_unreachable("unhandled kind");
+    }
+      
+    unsigned getFieldNo() const {
+      switch (getKind()) {
+        case Kind::TupleElement:
+          return 0; // [TOMA91]
+              
+        case Kind::Property:
+        case Kind::Subscript:
+        case Kind::Invalid:
+        case Kind::UnresolvedProperty:
+        case Kind::UnresolvedSubscript:
+        case Kind::OptionalChain:
+        case Kind::OptionalWrap:
+        case Kind::OptionalForce:
+        case Kind::Identity:
+          llvm_unreachable("not a tuple element");
+        }
+        llvm_unreachable("unhandled kind");
     }
 
     Type getComponentType() const {

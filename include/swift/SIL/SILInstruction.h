@@ -2486,6 +2486,12 @@ private:
            && "not an optional component");
   }
 
+  /// Constructor for tuple element components.
+  KeyPathPatternComponent(unsigned fieldNo)
+    : ValueAndKind((void*)((uintptr_t)Kind::TupleElement << KindPackingBits), PackedStored) {
+    // [TOMA91]
+  }
+    
 public:
   KeyPathPatternComponent() : ValueAndKind(nullptr, 0) {}
 
@@ -2621,6 +2627,11 @@ public:
   static KeyPathPatternComponent forStoredProperty(VarDecl *property,
                                                    CanType ty) {
     return KeyPathPatternComponent(property, ty);
+  }
+
+  static KeyPathPatternComponent forTupleElement() {
+    // [TOMA91]
+    return KeyPathPatternComponent(0);      
   }
   
   AbstractStorageDecl *getExternalDecl() const {

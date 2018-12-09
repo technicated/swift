@@ -2593,7 +2593,13 @@ public:
         printDeclRef(component.getDeclRef());
         OS << " ";
         break;
-      
+
+      case KeyPathExpr::Component::Kind::TupleElement:
+        OS << "tuple_element ";
+        OS << "#" << component.getFieldNo();
+        OS << " ";
+        break;
+
       case KeyPathExpr::Component::Kind::Subscript:
         OS << "subscript ";
         printDeclRef(component.getDeclRef());

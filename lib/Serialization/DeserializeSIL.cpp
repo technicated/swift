@@ -906,6 +906,11 @@ SILDeserializer::readKeyPathComponent(ArrayRef<uint64_t> ListOfValues,
     auto decl = cast<VarDecl>(MF->getDecl(ListOfValues[nextValue++]));
     return KeyPathPatternComponent::forStoredProperty(decl, type);
   }
+  case KeyPathComponentKindEncoding::TupleElement: {
+    llvm_unreachable("[TOMA91] What to do here?");
+    // [TOMA91 - IDEA] return KeyPathPatternComponent::forTupleElement(fieldNo, type);
+    break;
+  }
   case KeyPathComponentKindEncoding::GettableProperty: {
     auto id = handleComputedId();
     auto getterName = MF->getIdentifierText(ListOfValues[nextValue++]);

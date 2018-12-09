@@ -3533,6 +3533,11 @@ SILGenModule::emitKeyPathComponentForDecl(SILLocation loc,
   llvm_unreachable("unknown kind of storage");
 }
 
+KeyPathPatternComponent
+SILGenModule::emitKeyPathComponentForTupleElement() {
+    return KeyPathPatternComponent::forTupleElement();
+}
+
 RValue RValueEmitter::visitKeyPathExpr(KeyPathExpr *E, SGFContext C) {
   if (E->isObjC()) {
     return visit(E->getObjCStringLiteralExpr(), C);
@@ -3600,6 +3605,12 @@ RValue RValueEmitter::visitKeyPathExpr(KeyPathExpr *E, SGFContext C) {
              && "operand count out of sync");
       baseTy = loweredComponents.back().getComponentType();
 
+      break;
+    }
+            
+    case KeyPathExpr::Component::Kind::TupleElement: {
+      //llvm_unreachable("[TOMA91]");
+      SGF.SGM.emitKeyPathComponentForTupleElement();
       break;
     }
         

@@ -6668,6 +6668,7 @@ static bool diagnoseKeyPathComponents(ConstraintSystem &CS, KeyPathExpr *KPE,
 
     case KeyPathExpr::Component::Kind::OptionalWrap:
     case KeyPathExpr::Component::Kind::Property:
+    case KeyPathExpr::Component::Kind::TupleElement:
     case KeyPathExpr::Component::Kind::Subscript:
       llvm_unreachable("already resolved!");
     }

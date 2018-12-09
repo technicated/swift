@@ -639,6 +639,7 @@ getCalleeDeclAndArgs(ConstraintSystem &cs,
     case KeyPathExpr::Component::Kind::Invalid:
     case KeyPathExpr::Component::Kind::UnresolvedProperty:
     case KeyPathExpr::Component::Kind::Property:
+    case KeyPathExpr::Component::Kind::TupleElement:
     case KeyPathExpr::Component::Kind::OptionalForce:
     case KeyPathExpr::Component::Kind::OptionalChain:
     case KeyPathExpr::Component::Kind::OptionalWrap:
@@ -4271,7 +4272,13 @@ ConstraintSystem::simplifyKeyPathConstraint(Type keyPathTy,
       
       // Discarded unsupported non-decl member lookups.
       if (!choices[i].isDecl()) {
-        return SolutionKind::Error;
+        if (choices[i].getKind() == OverloadChoiceKind::TupleIndex) {
+          // A tuple element do not change the capability of the key path.
+          // FIXME: How to directly map a dot expression to a Component::Kind::TupleElement?
+          continue;
+        } else {
+          return SolutionKind::Error;
+        }
       }
       auto storage = dyn_cast<AbstractStorageDecl>(choices[i].getDecl());
       if (!storage) {
@@ -4308,7 +4315,11 @@ ConstraintSystem::simplifyKeyPathConstraint(Type keyPathTy,
       // Otherwise, the key path maintains its current capability.
       break;
     }
-    
+   
+    case KeyPathExpr::Component::Kind::TupleElement:
+      // A tuple element do not change the capability of the key path.
+      break;
+
     case KeyPathExpr::Component::Kind::OptionalChain:
       // Optional chains force the entire key path to be read-only.
       capability = ReadOnly;

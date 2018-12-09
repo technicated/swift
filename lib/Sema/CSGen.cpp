@@ -3045,6 +3045,11 @@ namespace {
                                          /*decl*/ nullptr, locator);
           break;
         }
+                
+        case KeyPathExpr::Component::Kind::TupleElement: {
+          llvm_unreachable("[TOMA91]");
+          break;
+        }
         
         case KeyPathExpr::Component::Kind::OptionalChain: {
           didOptionalChain = true;
