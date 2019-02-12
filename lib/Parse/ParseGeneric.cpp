@@ -50,6 +50,8 @@ Parser::parseGenericParametersBeforeWhere(SourceLoc LAngleLoc,
   ParserStatus Result;
   SyntaxParsingContext GPSContext(SyntaxContext, SyntaxKind::GenericParameterList);
   bool HasNextParam;
+  bool IsVariadic = false;
+  SourceLoc VariadicEllipsisLoc;
   do {
     SyntaxParsingContext GParamContext(SyntaxContext, SyntaxKind::GenericParameter);
     // Note that we're parsing a declaration.
@@ -66,6 +68,13 @@ Parser::parseGenericParametersBeforeWhere(SourceLoc LAngleLoc,
       attributes.add(new (Context) RawDocCommentAttr(Tok.getCommentRange()));
     bool foundCCTokenInAttr;
     parseDeclAttributeList(attributes, foundCCTokenInAttr);
+
+    // Check for variadic generics indicator
+    if (Tok.isEllipsis()) {
+      VariadicEllipsisLoc = Tok.getLoc();
+      IsVariadic = true;
+      consumeToken();
+    }
 
     // Parse the name of the parameter.
     Identifier Name;
@@ -121,8 +130,15 @@ Parser::parseGenericParametersBeforeWhere(SourceLoc LAngleLoc,
 
     // Parse the comma, if the list continues.
     HasNextParam = consumeIf(tok::comma);
-  } while (HasNextParam);
+  } while (HasNextParam && !IsVariadic);
 
+  // Complain if variadic generic is not last
+  if (IsVariadic && HasNextParam) {
+    diagnose(Tok.getLoc(), diag::generic_parameter_after_variadic);
+    diagnose(VariadicEllipsisLoc, diag::variadic_generic_loc);
+    Result.setIsParseError();
+  }
+    
   return Result;
 }
 
