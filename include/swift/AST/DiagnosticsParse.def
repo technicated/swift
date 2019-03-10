@@ -1527,10 +1527,13 @@ ERROR(where_without_generic_params,none,
 ERROR(where_inside_brackets,none,
         "'where' clause next to generic parameters is obsolete, "
         "must be written following the declaration's type", ())
-ERROR(generic_parameter_after_variadic,none,
-      "cannot declare a generic parmeter after a variadic generic", ())
-NOTE(variadic_generic_loc,none,
-     "variadic generic declared here", ())
+ERROR(variadic_generic_requires_ellipsis,none,
+      "variadic generic requires the use of the '...' syntax",
+      ())
+ERROR(unterminated_variadic_generic,none,
+      "unterminated variadic generic", ())
+NOTE(unterminated_variadic_generic_start,PointsToFirstBadToken,
+     "variadic generic started here", ())
 
 //------------------------------------------------------------------------------
 // MARK: Conditional compilation parsing diagnostics

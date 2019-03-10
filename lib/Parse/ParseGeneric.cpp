@@ -50,8 +50,6 @@ Parser::parseGenericParametersBeforeWhere(SourceLoc LAngleLoc,
   ParserStatus Result;
   SyntaxParsingContext GPSContext(SyntaxContext, SyntaxKind::GenericParameterList);
   bool HasNextParam;
-  bool IsVariadic = false;
-  SourceLoc VariadicEllipsisLoc;
   do {
     SyntaxParsingContext GParamContext(SyntaxContext, SyntaxKind::GenericParameter);
     // Note that we're parsing a declaration.
@@ -69,11 +67,23 @@ Parser::parseGenericParametersBeforeWhere(SourceLoc LAngleLoc,
     bool foundCCTokenInAttr;
     parseDeclAttributeList(attributes, foundCCTokenInAttr);
 
-    // Check for variadic generics indicator
-    if (Tok.isEllipsis()) {
-      VariadicEllipsisLoc = Tok.getLoc();
-      IsVariadic = true;
-      consumeToken();
+    // Check if this is a variadic generic
+    SourceLoc VariadicLParenLoc;
+    bool IsVariadic = false;
+    if (consumeIf(tok::l_paren, VariadicLParenLoc)) {
+      if (Tok.isEllipsis()) {
+        (void)consumeToken();
+        IsVariadic = true;
+      } else {
+        diagnose(VariadicLParenLoc, diag::variadic_generic_requires_ellipsis);
+        Result.setIsParseError();
+        break;
+      }
+    } else if (Tok.isEllipsis()) {
+      // TODO: add diagnostic about requiring '(' for variadic generic
+      diagnose(VariadicLParenLoc, diag::variadic_generic_requires_ellipsis);
+      Result.setIsParseError();
+      break;
     }
 
     // Parse the name of the parameter.
@@ -97,7 +107,7 @@ Parser::parseGenericParametersBeforeWhere(SourceLoc LAngleLoc,
       } else if (Tok.is(tok::kw_class)) {
         diagnose(Tok, diag::unexpected_class_constraint);
         diagnose(Tok, diag::suggest_anyobject)
-        .fixItReplace(Tok.getLoc(), "AnyObject");
+          .fixItReplace(Tok.getLoc(), "AnyObject");
         consumeToken();
         Result.setIsParseError();
       } else {
@@ -110,6 +120,13 @@ Parser::parseGenericParametersBeforeWhere(SourceLoc LAngleLoc,
 
       if (Ty.isNonNull())
         Inherited.push_back(Ty.get());
+    }
+
+    if (IsVariadic && !consumeIf(tok::r_paren)) {
+      diagnose(Tok, diag::unterminated_variadic_generic);
+      diagnose(VariadicLParenLoc, diag::unterminated_variadic_generic_start);
+      Result.setIsParseError();
+      break;
     }
 
     // We always create generic type parameters with an invalid depth.
@@ -125,20 +142,15 @@ Parser::parseGenericParametersBeforeWhere(SourceLoc LAngleLoc,
     // Attach attributes.
     Param->getAttrs() = attributes;
 
+    if (IsVariadic) Param->setVariadic();
+
     // Add this parameter to the scope.
     addToScope(Param);
 
     // Parse the comma, if the list continues.
     HasNextParam = consumeIf(tok::comma);
-  } while (HasNextParam && !IsVariadic);
+  } while (HasNextParam);
 
-  // Complain if variadic generic is not last
-  if (IsVariadic && HasNextParam) {
-    diagnose(Tok.getLoc(), diag::generic_parameter_after_variadic);
-    diagnose(VariadicEllipsisLoc, diag::variadic_generic_loc);
-    Result.setIsParseError();
-  }
-    
   return Result;
 }
 

@@ -165,11 +165,13 @@ void GenericParamList::print(llvm::raw_ostream &OS) {
   OS << '<';
   interleave(*this,
              [&](const GenericTypeParamDecl *P) {
+               if (P->isVariadic()) OS << "(...";
                OS << P->getName();
                if (!P->getInherited().empty()) {
                  OS << " : ";
                  P->getInherited()[0].getType().print(OS);
                }
+               if (P->isVariadic()) OS << ")";
              },
              [&] { OS << ", "; });
 

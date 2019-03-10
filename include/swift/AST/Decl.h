@@ -468,10 +468,11 @@ protected:
   SWIFT_INLINE_BITFIELD_EMPTY(TypeDecl, ValueDecl);
   SWIFT_INLINE_BITFIELD_EMPTY(AbstractTypeParamDecl, TypeDecl);
 
-  SWIFT_INLINE_BITFIELD_FULL(GenericTypeParamDecl, AbstractTypeParamDecl, 16+16,
+  SWIFT_INLINE_BITFIELD_FULL(GenericTypeParamDecl, AbstractTypeParamDecl, 1+15+16,
     : NumPadBits,
 
-    Depth : 16,
+    IsVariadic : 1,
+    Depth : 15,
     Index : 16
   );
 
@@ -2833,7 +2834,7 @@ public:
 /// \endcode
 class GenericTypeParamDecl : public AbstractTypeParamDecl {
 public:
-  static const unsigned InvalidDepth = 0xFFFF;
+  static const unsigned InvalidDepth = 0x7FFF;
 
   /// Construct a new generic type parameter.
   ///
@@ -2865,6 +2866,10 @@ public:
     Bits.GenericTypeParamDecl.Depth = depth;
     assert(Bits.GenericTypeParamDecl.Depth == depth && "Truncation");
   }
+
+  bool isVariadic() const { return Bits.GenericTypeParamDecl.IsVariadic; }
+
+  void setVariadic() { Bits.GenericTypeParamDecl.IsVariadic = 1; }
 
   /// The index of this generic type parameter within its generic parameter
   /// list.
