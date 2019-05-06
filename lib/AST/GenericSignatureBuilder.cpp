@@ -4013,20 +4013,30 @@ GenericSignatureBuilder::getGenericParams() const {
   return TypeArrayView<GenericTypeParamType>(Impl->GenericParams);
 }
 
-void GenericSignatureBuilder::addGenericParameter(GenericTypeParamDecl *GenericParam) {
-  addGenericParameter(
-     GenericParam->getDeclaredInterfaceType()->castTo<GenericTypeParamType>());
+void GenericSignatureBuilder::addGenericParameter(GenericParam GP) {
+  switch (GP.getKind()) {
+    case GenericParam::ParamKind::TypeParam:
+      addGenericParameter(
+        GP.getTypeParam()->getDeclaredInterfaceType()->castTo<GenericTypeParamType>());
+      break;
+  }
 }
 
-bool GenericSignatureBuilder::addGenericParameterRequirements(
-                                           GenericTypeParamDecl *GenericParam) {
-  GenericParamKey Key(GenericParam);
-  auto PA = Impl->PotentialArchetypes[Key.findIndexIn(getGenericParams())];
-  
-  // Add the requirements from the declaration.
-  return isErrorResult(
-           addInheritedRequirements(GenericParam, PA, nullptr,
-                                    GenericParam->getModuleContext()));
+bool GenericSignatureBuilder::addGenericParameterRequirements(GenericParam GP) {
+  // TODO: [GENERICS] Make `GenericParamKey` accept `GenericParam`s?
+  switch (GP.getKind()) {
+    case GenericParam::ParamKind::TypeParam: {
+      auto GTPD = GP.getTypeParam();
+      GenericParamKey Key(GTPD);
+      auto PA = Impl->PotentialArchetypes[Key.findIndexIn(getGenericParams())];
+        
+      // Add the requirements from the declaration.
+      return isErrorResult(
+               addInheritedRequirements(GTPD, PA, nullptr,
+                                        GTPD->getModuleContext()));
+    }
+  }
+  llvm_unreachable("Unhandled GenericParam::getKind()");
 }
 
 void GenericSignatureBuilder::addGenericParameter(GenericTypeParamType *GenericParam) {
@@ -7467,12 +7477,7 @@ GenericSignature *GenericSignatureBuilder::computeRequirementSignature(
   // Add all of the generic parameters.
   proto->createGenericParamsIfMissing();
   for (auto gp : *proto->getGenericParams()) {
-    // TODO: [GENERICS] Make GenericSignatureBuilder accept GenericParam
-    switch (gp.getKind()) {
-      case GenericParam::ParamKind::TypeParam:
-        builder.addGenericParameter(gp.getTypeParam());
-        break;
-    }
+    builder.addGenericParameter(gp);
   }
 
   // Add the conformance of 'self' to the protocol.

@@ -7923,24 +7923,15 @@ DeclContext *ClangImporter::Implementation::importDeclContextImpl(
 
 GenericSignature *ClangImporter::Implementation::buildGenericSignature(
     GenericParamList *genericParams, DeclContext *dc) {
-  // TODO: [GENERICS] Make GenericSignatureBuilder accept GenericParam
   GenericSignatureBuilder builder(SwiftContext);
   for (auto param : *genericParams) {
-    switch (param.getKind()) {
-      case GenericParam::ParamKind::TypeParam:
-        builder.addGenericParameter(param.getTypeParam());
-        break;
-    }
+    builder.addGenericParameter(param);
   }
+
   for (auto param : *genericParams) {
-    switch (param.getKind()) {
-      case GenericParam::ParamKind::TypeParam:
-        bool result = builder.addGenericParameterRequirements(
-                                                        param.getTypeParam());
-        assert(!result);
-        (void) result;
-        break;
-    }
+    bool result = builder.addGenericParameterRequirements(param);
+    assert(!result);
+    (void) result;
   }
 
   return std::move(builder).computeGenericSignature(SourceLoc());

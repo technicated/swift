@@ -1887,12 +1887,7 @@ configureGenericDesignatedInitOverride(ASTContext &ctx,
 
     // Add the generic parameters.
     for (auto newParam : newParams) {
-      // TODO: [GENERICS] Get GenericSignatureBuilder to accept GenericParam
-      switch (newParam.getKind()) {
-        case GenericParam::ParamKind::TypeParam:
-          builder.addGenericParameter(newParam.getTypeParam());
-          break;
-      }
+      builder.addGenericParameter(newParam);
     }
 
     auto source =

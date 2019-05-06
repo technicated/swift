@@ -477,6 +477,7 @@ namespace {
 
       GenericSignatureBuilder Builder(ctx);
       for (auto gp : GenericTypeParams) {
+        // TODO: [GENERICS] Change the type of `GenericTypeParams`?
         Builder.addGenericParameter(gp);
       }
 

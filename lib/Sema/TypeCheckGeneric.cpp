@@ -53,23 +53,13 @@ static void checkGenericParamList(TypeChecker &tc,
   // Do this before checking the inheritance clause, since it may
   // itself be dependent on one of these parameters.
   for (auto param : *genericParams) {
-    // TODO: [GENERICS] Update GenericSignatureBuilder to accept GenericParam
-    switch (param.getKind()) {
-      case GenericParam::ParamKind::TypeParam:
-        builder->addGenericParameter(param.getTypeParam());
-        break;
-    }
+    builder->addGenericParameter(param);
   }
 
   // Add the requirements for each of the generic parameters to the builder.
   // Now, check the inheritance clauses of each parameter.
   for (auto param : *genericParams) {
-    // TODO: [GENERICS] Update GenericSignatureBuilder to accept GenericParam
-    switch (param.getKind()) {
-      case GenericParam::ParamKind::TypeParam:
-        builder->addGenericParameterRequirements(param.getTypeParam());
-        break;
-    }
+    builder->addGenericParameterRequirements(param);
   }
 
   // Add the requirements clause to the builder.
