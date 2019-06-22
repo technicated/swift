@@ -126,6 +126,8 @@ public:
   IGNORED_ATTR(DynamicReplacement)
   IGNORED_ATTR(PrivateImport)
   IGNORED_ATTR(Custom)
+
+  IGNORED_ATTR(VariadicGeneric)
 #undef IGNORED_ATTR
 
   void visitAlignmentAttr(AlignmentAttr *attr) {
@@ -784,6 +786,8 @@ public:
     IGNORED_ATTR(Transparent)
     IGNORED_ATTR(WarnUnqualifiedAccess)
     IGNORED_ATTR(WeakLinked)
+    
+    IGNORED_ATTR(VariadicGeneric)
 #undef IGNORED_ATTR
 
   void visitAvailableAttr(AvailableAttr *attr);
