@@ -477,7 +477,9 @@ protected:
   SWIFT_INLINE_BITFIELD_EMPTY(TypeDecl, ValueDecl);
   SWIFT_INLINE_BITFIELD_EMPTY(AbstractTypeParamDecl, TypeDecl);
 
-  SWIFT_INLINE_BITFIELD_FULL(GenericTypeParamDecl, AbstractTypeParamDecl, 16+16,
+  SWIFT_INLINE_BITFIELD_FULL(GenericTypeParamDecl, AbstractTypeParamDecl, 1+16+16,
+    IsVariadic : 1,
+                             
     : NumPadBits,
 
     Depth : 16,
@@ -2929,8 +2931,18 @@ public:
   /// \param name The name of the generic parameter.
   /// \param nameLoc The location of the name.
   GenericTypeParamDecl(DeclContext *dc, Identifier name, SourceLoc nameLoc,
-                       unsigned depth, unsigned index);
+                       unsigned depth, unsigned index, bool isVariadic);
 
+  /// Returns wether this generic parameter is variadic.
+  ///
+  /// In the following example, 'T' is a *variadic generic* constrained to the
+  /// 'Comparable' protocol.
+  ///
+  /// \code
+  /// struct Variadic<variadic T : Comparable> { ... }
+  /// \endcode
+  bool isVariadic() const { return Bits.GenericTypeParamDecl.IsVariadic; }
+    
   /// The depth of this generic type parameter, i.e., the number of outer
   /// levels of generic parameter lists that enclose this type parameter.
   ///

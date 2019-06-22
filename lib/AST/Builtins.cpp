@@ -431,7 +431,8 @@ createGenericParam(ASTContext &ctx, const char *name, unsigned index) {
   SmallVector<ProtocolDecl *, 1> protos;
   auto genericParam =
     new (ctx) GenericTypeParamDecl(&M->getMainFile(FileUnitKind::Builtin),
-                                   ident, SourceLoc(), 0, index);
+                                   ident, SourceLoc(), 0, index,
+      /* TODO: [GENERICS] what to do here? What is `GenericParamNames`? */ false);
   return genericParam;
 }
 

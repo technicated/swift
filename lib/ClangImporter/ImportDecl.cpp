@@ -6725,7 +6725,7 @@ Optional<GenericParamList *> SwiftDeclConverter::importObjCGenericParams(
         objcGenericParam, AccessLevel::Public, dc,
         Impl.SwiftContext.getIdentifier(objcGenericParam->getName()),
         Impl.importSourceLoc(objcGenericParam->getLocation()),
-        /*depth*/ 0, /*index*/ genericParams.size());
+        /*depth*/ 0, /*index*/ genericParams.size(), /*isVariadic*/ false);
     // NOTE: depth is always 0 for ObjC generic type arguments, since only
     // classes may have generic types in ObjC, and ObjC classes cannot be
     // nested.
