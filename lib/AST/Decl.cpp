@@ -745,8 +745,8 @@ GenericParamList::clone(DeclContext *dc) const {
           
         auto *newParam = new (ctx) GenericTypeParamDecl(
           dc, GTPD->getName(), GTPD->getNameLoc(),
-          GenericTypeParamDecl::InvalidDepth, GTPD->getIndex(),
-          GTPD->isVariadic());
+          GenericTypeParamDecl::InvalidDepth,
+          GTPD->getIndex());
         params.push_back(newParam);
           
         SmallVector<TypeLoc, 2> inherited;
@@ -1206,8 +1206,7 @@ static GenericParamList *cloneGenericParams(ASTContext &ctx,
         auto toGP = new (ctx) GenericTypeParamDecl(ext, GTPD->getName(),
                                                    SourceLoc(),
                                                    GTPD->getDepth(),
-                                                   GTPD->getIndex(),
-                                                   GTPD->isVariadic());
+                                                   GTPD->getIndex());
         toGP->setImplicit(true);
         toGenericParams.push_back(toGP);
           
@@ -3473,10 +3472,8 @@ AbstractTypeParamDecl::getConformingProtocols() const {
 
 GenericTypeParamDecl::GenericTypeParamDecl(DeclContext *dc, Identifier name,
                                            SourceLoc nameLoc,
-                                           unsigned depth, unsigned index,
-                                           bool isVariadic)
+                                           unsigned depth, unsigned index)
   : AbstractTypeParamDecl(DeclKind::GenericTypeParam, dc, name, nameLoc) {
-  Bits.GenericTypeParamDecl.IsVariadic = isVariadic;
   Bits.GenericTypeParamDecl.Depth = depth;
   assert(Bits.GenericTypeParamDecl.Depth == depth && "Truncation");
   Bits.GenericTypeParamDecl.Index = index;
@@ -4522,7 +4519,7 @@ void ProtocolDecl::createGenericParamsIfMissing() {
   auto selfDecl = new (ctx) GenericTypeParamDecl(
       this, selfId,
       SourceLoc(),
-      /*depth=*/getGenericContextDepth() + 1, /*index=*/0, false);
+      /*depth=*/getGenericContextDepth() + 1, /*index=*/0);
   auto protoType = getDeclaredType();
   TypeLoc selfInherited[1] = { TypeLoc::withoutLoc(protoType) };
   selfDecl->setInherited(ctx.AllocateCopy(selfInherited));

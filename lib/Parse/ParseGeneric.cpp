@@ -106,11 +106,9 @@ Parser::parseGenericParametersBeforeWhere(SourceLoc LAngleLoc,
     // We always create generic type parameters with an invalid depth.
     // Semantic analysis fills in the depth when it processes the generic
     // parameter list.
-    // TODO: [GENERICS] Parse `variadic` and set flag accordingly
     auto Param = new (Context) GenericTypeParamDecl(CurDeclContext, Name, NameLoc,
                                             GenericTypeParamDecl::InvalidDepth,
-                                            GenericParams.size(),
-                                            /*isVariadic*/ false);
+                                                    GenericParams.size());
     if (!Inherited.empty())
       Param->setInherited(Context.AllocateCopy(Inherited));
     GenericParams.push_back(Param);

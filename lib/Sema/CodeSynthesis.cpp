@@ -1865,8 +1865,7 @@ configureGenericDesignatedInitOverride(ASTContext &ctx,
                                                           GTPD->getName(),
                                                           SourceLoc(),
                                                           depth,
-                                                          GTPD->getIndex(),
-                                                          GTPD->isVariadic());
+                                                          GTPD->getIndex());
           newParams.push_back(newParam);
           break;
         }

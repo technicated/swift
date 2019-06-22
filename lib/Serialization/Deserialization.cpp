@@ -974,8 +974,7 @@ ModuleFile::getGenericSignatureOrEnvironment(
                                            name,
                                            SourceLoc(),
                                            paramTy->getDepth(),
-                                           paramTy->getIndex(),
-                                           /* TODO: [GENERICS] */ /*isVariadic*/ false);
+                                           paramTy->getIndex());
         paramTy = paramDecl->getDeclaredInterfaceType()
                    ->castTo<GenericTypeParamType>();
       }
@@ -2372,8 +2371,7 @@ public:
     // the real context will reparent them.
     auto DC = MF.getAssociatedModule();
     auto genericParam = MF.createDecl<GenericTypeParamDecl>(
-        DC, MF.getIdentifier(nameID), SourceLoc(), depth, index,
-        /*isVariadic*/ false); // TODO: [GENERICS] Deserialize `isVariadic` flag
+        DC, MF.getIdentifier(nameID), SourceLoc(), depth, index);
     declOrOffset = genericParam;
 
     if (isImplicit)
