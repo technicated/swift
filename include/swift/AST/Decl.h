@@ -1499,6 +1499,10 @@ public:
   /// Configure the depth of the generic parameters in this list.
   void setDepth(unsigned depth);
 
+  /// Returns a flag indicating whether this parameter list is compatible with
+  /// the given number of generic arguments.
+  bool matchesGenericArgs(unsigned genericArgsSize) const;
+
   /// Create a copy of the generic parameter list and all of its generic
   /// parameter declarations. The copied generic parameters are re-parented
   /// to the given DeclContext.

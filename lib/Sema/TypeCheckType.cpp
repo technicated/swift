@@ -703,7 +703,7 @@ Type TypeChecker::applyGenericArguments(Type type,
   auto genericDecl = cast<GenericTypeDecl>(decl);
   auto genericArgs = generic->getGenericArgs();
   auto genericParams = genericDecl->getGenericParams();
-  if (genericParams->size() != genericArgs.size()) {
+  if (!genericParams->matchesGenericArgs(genericArgs.size())) {
     if (!options.contains(TypeResolutionFlags::SilenceErrors)) {
       diags.diagnose(loc, diag::type_parameter_count_mismatch, decl->getName(),
                      genericParams->size(), genericArgs.size(),
@@ -783,7 +783,7 @@ Type TypeChecker::applyUnboundGenericArguments(
     UnboundGenericType *unboundType, GenericTypeDecl *decl,
     SourceLoc loc, TypeResolution resolution,
     ArrayRef<Type> genericArgs) {
-  assert(genericArgs.size() == decl->getGenericParams()->size() &&
+  assert(decl->getGenericParams()->matchesGenericArgs(genericArgs.size()) &&
          "invalid arguments, use applyGenericArguments for diagnostic emitting");
 
   auto genericSig = decl->getGenericSignature();

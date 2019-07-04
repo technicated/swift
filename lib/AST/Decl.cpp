@@ -828,6 +828,29 @@ void GenericParamList::setDepth(unsigned depth) {
     param.setDepth(depth);
 }
 
+bool GenericParamList::matchesGenericArgs(unsigned genericArgsSize) const {
+  // If this generic parameter list contains a variadic generic, then the size
+  // of generic argument array can be greater than the number of generic
+  // parameters
+  bool isVariadic = false;
+
+  for (auto GP : *this) {
+    switch (GP.getKind()) {
+
+    case GenericParam::ParamKind::TypeParam:
+      if (GP.getTypeParam()->getAttrs().hasAttribute<VariadicGenericAttr>())
+        isVariadic = true;
+      break;
+
+    }
+  }
+
+  auto thisSize = this->size();
+
+  return genericArgsSize == thisSize
+    || (isVariadic && genericArgsSize > thisSize);
+}
+
 TrailingWhereClause::TrailingWhereClause(
                        SourceLoc whereLoc,
                        ArrayRef<RequirementRepr> requirements)
