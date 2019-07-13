@@ -47,24 +47,56 @@ using namespace swift;
                 "Types are BumpPtrAllocated; the destructor is never called");
 #include "swift/AST/TypeNodes.def"
 
-Type QueryTypeSubstitutionMap::operator()(SubstitutableType *type) const {
+Type QueryTypeSubstitutionMap::operator()(SubstitutableType *type, unsigned idx) const {
   auto key = type->getCanonicalType()->castTo<SubstitutableType>();
   auto known = substitutions.find(key);
-  if (known != substitutions.end() && known->second)
-    return known->second;
 
   // Not known.
-  return Type();
+  if (!known)
+    return Type();
+
+  Type result;
+
+  switch (known->getKind()) {
+
+  case TypeSubstitutionMap::SubstKind::Standard:
+    result = known->getSingleType();
+    break;
+
+  case TypeSubstitutionMap::SubstKind::Variadic:
+    result = known->getTypeAtIndex(idx).getValueOr(Type());
+    break;
+
+  }
+
+  return result;
 }
 
 Type
-QueryTypeSubstitutionMapOrIdentity::operator()(SubstitutableType *type) const {
+QueryTypeSubstitutionMapOrIdentity::operator()(SubstitutableType *type,
+                                               unsigned idx) const {
   auto key = type->getCanonicalType()->castTo<SubstitutableType>();
   auto known = substitutions.find(key);
-  if (known != substitutions.end() && known->second)
-    return known->second;
-  
-  return type;
+
+  // Not known.
+  if (!known)
+    return type;
+
+  Type result;
+
+  switch (known->getKind()) {
+
+  case TypeSubstitutionMap::SubstKind::Standard:
+    result = known->getSingleType();
+    break;
+
+  case TypeSubstitutionMap::SubstKind::Variadic:
+    result = known->getTypeAtIndex(idx).getValueOr(type);
+    break;
+
+  }
+
+  return result;
 }
 
 Type QuerySubstitutionMap::operator()(SubstitutableType *type) const {
@@ -114,6 +146,16 @@ GenericTypeDecl *CanType::getAnyGeneric() const {
   if (auto Ty = dyn_cast<AnyGenericType>(*this))
     return Ty->getDecl();
   return nullptr;
+}
+
+llvm::Optional<TypeSubstitutionMap::Substitution> TypeSubstitutionMap::find(
+                                                SubstitutableType* key) const {
+  auto result = subs.find(key);
+    
+  if (result != subs.end())
+    return result->second;
+    
+  return llvm::NoneType::None;
 }
 
 //===----------------------------------------------------------------------===//

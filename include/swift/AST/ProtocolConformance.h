@@ -43,8 +43,9 @@ enum class AllocationArena;
 
 /// Type substitution mapping from substitutable types to their
 /// replacements.
-typedef llvm::DenseMap<SubstitutableType *, Type> TypeSubstitutionMap;
-
+//typedef llvm::DenseMap<SubstitutableType *, SmallVector<Type, 4>>
+//  TypeSubstitutionMap;
+    
 /// Map from non-type requirements to the corresponding conformance witnesses.
 typedef llvm::DenseMap<ValueDecl *, Witness> WitnessMap;
 

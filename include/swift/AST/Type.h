@@ -51,12 +51,14 @@ class SubstitutableType;
 class SubstitutionMap;
 class TypeBase;
 class Type;
+class TypeSubstitutionMap;
 class TypeWalker;
 struct ExistentialLayout;
 
 /// Type substitution mapping from substitutable types to their
 /// replacements.
-typedef llvm::DenseMap<SubstitutableType *, Type> TypeSubstitutionMap;
+//typedef llvm::DenseMap<SubstitutableType *, SmallVector<Type, 4>>
+//  TypeSubstitutionMap;
 
 /// Function used to provide substitutions.
 ///
@@ -76,7 +78,7 @@ struct MapTypeOutOfContext {
 struct QueryTypeSubstitutionMap {
   const TypeSubstitutionMap &substitutions;
 
-  Type operator()(SubstitutableType *type) const;
+  Type operator()(SubstitutableType *type, unsigned idx) const;
 };
 
 /// A function object suitable for use as a \c TypeSubstitutionFn that
@@ -85,7 +87,7 @@ struct QueryTypeSubstitutionMap {
 struct QueryTypeSubstitutionMapOrIdentity {
   const TypeSubstitutionMap &substitutions;
   
-  Type operator()(SubstitutableType *type) const;
+  Type operator()(SubstitutableType *type, unsigned idx) const;
 };
 
 /// Function used to resolve conformances.
@@ -364,6 +366,94 @@ private:
   // Direct comparison is disabled for types, because they may not be canonical.
   void operator==(Type T) const = delete;
   void operator!=(Type T) const = delete;
+};
+
+/// What to write here?
+class TypeSubstitutionMap final {
+
+public:
+  /// An enumeration representing the Kind of this Substitution (Standard or
+  /// Variadic).
+  enum class SubstKind { Standard, Variadic };
+
+  /// This class represents the mapping of a substitution. It can either be a
+  /// single Type (in the case of a Standard Generic) or a collection of types
+  /// (in the case of a Variadic Generic).
+  class Substitution final {
+
+  private:
+    /// The kind of this Substitution.
+    SubstKind Kind;
+
+    /// An anonymous union representing either the single Type available for
+    /// substitution (in the case of a Standard Generic) or a collection of
+    /// substitutable types (in the case of a Variadic Generic).
+    union {
+      Type SubstType;
+      SmallVector<Type, 4> SubstTypes;
+    };
+
+  public:
+    /// Constructs a Substitution for a Standard Generic.
+    Substitution(Type type) : Kind(SubstKind::Standard), SubstType(type)
+      {}
+
+    /// Constructs a Substitution for a Variadic Generic.
+    Substitution(SmallVectorImpl<Type> &types) : Kind(SubstKind::Variadic) {
+      // Is there a better way to copy a SmallVectorImpl into a SmallVector?
+      for (auto type : types)
+        types.push_back(type);
+    }
+
+    Substitution(const Substitution &other) : Kind(other.Kind) {
+      switch (Kind) {
+
+      case SubstKind::Standard:
+        SubstType = other.SubstType;
+        break;
+
+      case SubstKind::Variadic:
+        for (auto type : other.SubstTypes)
+          SubstTypes.push_back(type);
+        break;
+
+      }
+    }
+
+    /// Is this needed? If not declared, I get "Destructor of 'Substitution' is
+    /// implicitly deleted because variant field 'types' has a non-trivial
+    /// destructor". Better to not declare Substitution payload as an anonymous
+    /// union?
+    ///
+    /// Moreover, should this be public or private?
+    ~Substitution() {
+      if (getKind() == SubstKind::Variadic)
+        SubstTypes.~SmallVector();
+    }
+      
+    SubstKind getKind() const { return Kind; }
+
+    Type getSingleType() const {
+      assert(getKind() == SubstKind::Standard && "Not SubstKind::Standard");
+
+      return SubstType;
+    }
+
+    llvm::Optional<Type> getTypeAtIndex(unsigned idx) const {
+      assert(getKind() == SubstKind::Variadic && "Not SubstKind::Variadic");
+
+      if (idx < SubstTypes.size())
+        return SubstTypes[idx];
+        
+      return llvm::NoneType::None;
+    }
+  }; // Substitution
+
+private:
+  llvm::DenseMap<SubstitutableType *, Substitution> subs;
+    
+public:
+  llvm::Optional<Substitution> find(SubstitutableType* key) const;
 };
 
 /// CanType - This is a Type that is statically known to be canonical.  To get

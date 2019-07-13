@@ -820,6 +820,25 @@ Type TypeChecker::applyUnboundGenericArguments(
   if (noteLoc.isInvalid())
     noteLoc = loc;
 
+  unsigned i = 0;
+  auto *GPL = decl->getGenericParams();
+  unsigned e = GPL->size();
+
+  for (auto GP : *GPL) {
+    switch (GP.getKind()) {
+    case GenericParam::ParamKind::TypeParam:
+      auto *GTPD = GP.getTypeParam();
+
+      if (GTPD->getAttrs().hasAttribute<VariadicGenericAttr>()) {
+
+      } else {
+
+      }
+
+      break;
+    }
+  }
+
   // Realize the types of the generic arguments and add them to the
   // substitution map.
   for (unsigned i = 0, e = genericArgs.size(); i < e; i++) {
